@@ -55,6 +55,14 @@ server:
     include-stacktrace: never
     include-binding-errors: never
 
+logging:
+  file:
+    name: logs/starsoft-api.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+
 jwt:
   secret: ${JWT_SECRET:dev-only-change-me-in-prod-min-32-bytes-required-for-hs256-signing}
   expiration: ${JWT_EXPIRATION:86400000}

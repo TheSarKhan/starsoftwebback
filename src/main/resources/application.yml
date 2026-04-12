@@ -3,9 +3,9 @@ spring:
     name: starsoft-api
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:khansoft_db}
-    username: ${DB_USER:khansoft_user}
-    password: ${DB_PASSWORD:khansoft_pass}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:starsoft_db}
+    username: ${DB_USER:starsoft_user}
+    password: ${DB_PASSWORD:starsoft_pass}
     driver-class-name: org.postgresql.Driver
 
   jpa:

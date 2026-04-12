@@ -58,7 +58,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: mvn -f backend/pom.xml clean spring-boot:run -DskipTests
+    command: mvn -f pom.xml clean spring-boot:run -DskipTests
 
 volumes:
   starsoft_postgres_data:

@@ -20,7 +20,10 @@ import java.util.UUID;
 public class ImageController {
 
     private static final Set<String> ALLOWED_TYPES = Set.of(
-            "image/jpeg", "image/png", "image/webp", "image/gif"
+            "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"
+    );
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+            ".jpg", ".jpeg", ".png", ".webp", ".gif"
     );
     private static final long MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
@@ -43,12 +46,13 @@ public class ImageController {
         if (file.getSize() > MAX_SIZE) {
             return ResponseEntity.badRequest().body(Map.of("error", "Fayl 5 MB-dan böyükdür."));
         }
+        String ext = getExtension(file.getOriginalFilename());
         String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+        boolean validByType = contentType != null && ALLOWED_TYPES.contains(contentType.toLowerCase());
+        boolean validByExtension = ALLOWED_EXTENSIONS.contains(ext);
+        if (!validByType && !validByExtension) {
             return ResponseEntity.badRequest().body(Map.of("error", "Yalnız JPEG, PNG, WebP və GIF icazəlidir."));
         }
-
-        String ext = getExtension(file.getOriginalFilename());
         String filename = UUID.randomUUID() + ext;
 
         try {
@@ -90,6 +94,7 @@ public class ImageController {
     private String getExtension(String filename) {
         if (filename == null) return ".jpg";
         int dot = filename.lastIndexOf('.');
-        return dot >= 0 ? filename.substring(dot).toLowerCase() : ".jpg";
+        String ext = dot >= 0 ? filename.substring(dot).toLowerCase() : ".jpg";
+        return ALLOWED_EXTENSIONS.contains(ext) ? ext : ".jpg";
     }
 }

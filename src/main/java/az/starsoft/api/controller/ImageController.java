@@ -25,7 +25,7 @@ public class ImageController {
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
             ".jpg", ".jpeg", ".png", ".webp", ".gif"
     );
-    private static final long MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+    private static final long MAX_SIZE = 20 * 1024 * 1024; // 20 MB
 
     private final Path uploadDir;
 
@@ -66,8 +66,11 @@ public class ImageController {
             String url = "/images/" + filename;
             return ResponseEntity.ok(Map.of("url", url, "filename", filename));
         } catch (IOException e) {
-            log.error("Image upload failed", e);
-            return ResponseEntity.internalServerError().body(Map.of("error", "Yükləmə uğursuz oldu."));
+            log.error("Image upload failed — dir={} file={} cause={}", uploadDir, filename, e.getMessage(), e);
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "error", "upload_failed",
+                    "message", "Yükləmə uğursuz oldu: " + e.getMessage()
+            ));
         }
     }
 

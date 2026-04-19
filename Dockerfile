@@ -19,11 +19,15 @@ RUN mvn -B -q clean package -DskipTests \
 FROM eclipse-temurin:17-jre-alpine AS runtime
 WORKDIR /app
 
-# Run as non-root
-RUN addgroup -S khansoft && adduser -S khansoft -G khansoft
-USER khansoft
+# Create non-root user and writable directories before switching user.
+# chown on images/logs ensures Docker named-volume mounts inherit correct ownership.
+RUN addgroup -S khansoft && adduser -S khansoft -G khansoft \
+    && mkdir -p /app/images /app/logs \
+    && chown -R khansoft:khansoft /app
 
-COPY --from=build /build/target/app.jar /app/app.jar
+COPY --from=build --chown=khansoft:khansoft /build/target/app.jar /app/app.jar
+
+USER khansoft
 
 EXPOSE 8080
 

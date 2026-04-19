@@ -32,6 +32,27 @@ services:
       timeout: 3s
       retries: 10
 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: starsoft/backend:latest
+    container_name: starsoft-backend
+    restart: unless-stopped
+    env_file: .env.prod
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_images:/app/images
+      - backend_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   postgres_data:
   redis_data:
+  backend_images:
+  backend_logs:

@@ -2,16 +2,15 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: starsoft-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${DB_PORT}:5432"
+      - "5433:5432"
     volumes:
-      - starsoft_postgres_data:/var/lib/postgresql/data
-    networks:
-      - starsoft-network
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -21,63 +20,18 @@ services:
   redis:
     image: redis:7-alpine
     container_name: starsoft-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
-      - "${REDIS_PORT}:6379"
-    command: redis-server --appendonly yes
+      - "6380:6379"
     volumes:
-      - starsoft_redis_data:/data
-    networks:
-      - starsoft-network
+      - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
 
-  backend:
-    image: maven:3.9-eclipse-temurin-17
-    container_name: starsoft-backend
-    working_dir: /app
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      JWT_SECRET: ${JWT_SECRET}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_FULL_NAME: ${ADMIN_FULL_NAME}
-      MAIL_HOST: ${MAIL_HOST}
-      MAIL_PORT: ${MAIL_PORT}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-      MAIL_FROM: ${MAIL_FROM}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME}
-      MAIL_NOTIFY_TO: ${MAIL_NOTIFY_TO}
-      MAIL_ENABLED: ${MAIL_ENABLED}
-    ports:
-      - "8080:8080"
-    volumes:
-      - .:/app
-      - maven_cache:/root/.m2
-    networks:
-      - starsoft-network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: mvn -f pom.xml clean spring-boot:run -DskipTests
-
 volumes:
-  starsoft_postgres_data:
-  starsoft_redis_data:
-  maven_cache:
-
-networks:
-  starsoft-network:
-    driver: bridge
-    
+  postgres_data:
+  redis_data:
